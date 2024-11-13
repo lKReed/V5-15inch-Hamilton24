@@ -14,10 +14,10 @@ using namespace vex;
 // A global instance of competition
 competition Competition;
 controller Controller = controller();
-motor leftFront = motor(PORT1, false);
-motor leftBack = motor(PORT2, false);
-motor rightFront = motor(PORT9, false);
-motor rightBack = motor(PORT10, false);
+motor leftFront = motor(PORT9, false);
+motor leftBack = motor(PORT10, false);
+motor rightFront = motor(PORT1, false);
+motor rightBack = motor(PORT2, false);
 
 motor pusher = motor(PORT3, false);
 motor leftArm = motor(PORT4, false);
