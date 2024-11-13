@@ -13,6 +13,16 @@ using namespace vex;
 
 // A global instance of competition
 competition Competition;
+controller Controller = controller();
+motor leftFront = motor(PORT1, false);
+motor leftBack = motor(PORT2, false);
+motor rightFront = motor(PORT9, false);
+motor rightBack = motor(PORT10, false);
+
+motor pusher = motor(PORT3, false);
+motor leftArm = motor(PORT4, false);
+motor rightArm = motor(PORT5, false);
+
 
 // define your global instances of motors and other devices here
 
@@ -69,6 +79,28 @@ void usercontrol(void) {
     // Insert user code here. This is where you use the joystick values to
     // update your motors, etc.
     // ........................................................................
+
+    // Basic tank drive
+    leftFront.spin(forward, Controller.Axis3.position(), percent); // Left Front Drive Code
+    leftBack.spin(forward, Controller.Axis3.position(), percent); // Left Back Drive Code
+    rightFront.spin(forward, Controller.Axis2.position(), percent); // Right Front Drive Code
+    rightBack.spin(forward, Controller.Axis2.position(), percent); // Right Back Drive Code
+
+    // Move arm
+    if (Controller.ButtonL1.pressing()) {
+      leftArm.spin(forward);
+      rightArm.spin(forward);
+    }
+
+    if (Controller.ButtonL2.pressing()) {
+      leftArm.spin(reverse);
+      rightArm.spin(reverse);
+    }
+
+    // Move pusher
+    if (Controller.ButtonA.pressing()) {
+      pusher.spin(forward);
+    }
 
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
