@@ -13,18 +13,30 @@ using namespace vex;
 
 // A global instance of competition
 competition Competition;
+
+// Motor and Controller definitions
 controller Controller = controller();
+
 motor leftFront = motor(PORT9, false);
 motor leftBack = motor(PORT10, false);
+motor_group leftDrive = motor_group(leftFront, leftBack);
+
 motor rightFront = motor(PORT1, false);
 motor rightBack = motor(PORT2, false);
+motor_group rightDrive = motor_group(rightFront, rightBack);
 
 motor pusher = motor(PORT3, false);
+
+motor clamp = motor(PORT7, false);
+
 motor leftArm = motor(PORT4, false);
 motor rightArm = motor(PORT5, false);
+motor_group armMotors = motor_group(leftArm, rightArm);
 
-
-// define your global instances of motors and other devices here
+// Global Variables (Constants)
+int pusher_start_position = 0;
+int pusher_end_position = 30;
+int arm_start_position = 0;
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -40,6 +52,20 @@ void pre_auton(void) {
 
   // All activities that occur before the competition starts
   // Example: clearing encoders, setting servo positions, ...
+
+  // Set motor brake modes
+  armMotors.setStopping(hold);
+  clamp.setStopping(hold);
+
+  leftFront.setStopping(brake);
+  leftBack.setStopping(brake);
+  rightFront.setStopping(brake);
+  rightBack.setStopping(brake);
+
+  // Set motors to correct position for auto
+  pusher.setPosition(pusher_start_position, degrees);
+  armMotors.setPosition(arm_start_position, degrees);
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -56,6 +82,8 @@ void autonomous(void) {
   // ..........................................................................
   // Insert autonomous user code here.
   // ..........................................................................
+  leftDrive.spinFor(forward, 30, degrees);
+  rightDrive.spinFor(forward, 30, degrees);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -88,21 +116,20 @@ void usercontrol(void) {
 
     // Move arm
     if (Controller.ButtonL1.pressing()) {
-      leftArm.spin(forward);
-      rightArm.spin(forward);
+      armMotors.spin(forward);
     }
-
-    if (Controller.ButtonL2.pressing()) {
-      leftArm.spin(reverse);
-      rightArm.spin(reverse);
+    else if (Controller.ButtonL2.pressing()) {
+      armMotors.spin(reverse);
     }
 
     // Move pusher
     if (Controller.ButtonA.pressing()) {
       pusher.spin(forward);
+      if (pusher.isDone()) {
+        pusher.setPosition(pusher_start_position, degrees);
+      }
     }
-
-    if (Controller.ButtonB.pressing()) {
+    else if (Controller.ButtonB.pressing()) {
       pusher.spin(reverse);
     }
 
