@@ -34,9 +34,8 @@ motor rightArm = motor(PORT5, false);
 motor_group armMotors = motor_group(leftArm, rightArm);
 
 // Global Variables (Constants)
-int pusher_start_position = 0;
-int pusher_end_position = 30;
-int arm_start_position = 0;
+int PusherStartPosition = 0;
+int ArmStartPosition = 0;
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -63,8 +62,8 @@ void pre_auton(void) {
   rightBack.setStopping(brake);
 
   // Set motors to correct position for auto
-  pusher.setPosition(pusher_start_position, degrees);
-  armMotors.setPosition(arm_start_position, degrees);
+  pusher.setPosition(PusherStartPosition, degrees);
+  armMotors.setPosition(ArmStartPosition, degrees);
 
 }
 
@@ -126,7 +125,7 @@ void usercontrol(void) {
     if (Controller.ButtonA.pressing()) {
       pusher.spin(forward);
       if (pusher.isDone()) {
-        pusher.setPosition(pusher_start_position, degrees);
+        pusher.setPosition(PusherStartPosition, degrees);
       }
     }
     else if (Controller.ButtonB.pressing()) {
