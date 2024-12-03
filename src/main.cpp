@@ -21,8 +21,8 @@ motor leftFront = motor(PORT9, false);
 motor leftBack = motor(PORT10, false);
 motor_group leftDrive = motor_group(leftFront, leftBack);
 
-motor rightFront = motor(PORT1, false);
-motor rightBack = motor(PORT2, false);
+motor rightFront = motor(PORT1, true);
+motor rightBack = motor(PORT2, true);
 motor_group rightDrive = motor_group(rightFront, rightBack);
 
 motor pusher = motor(PORT3, false);
@@ -30,7 +30,7 @@ motor pusher = motor(PORT3, false);
 motor clamp = motor(PORT7, false);
 
 motor leftArm = motor(PORT4, false);
-motor rightArm = motor(PORT5, false);
+motor rightArm = motor(PORT5, true);
 motor_group armMotors = motor_group(leftArm, rightArm);
 
 // Global Variables (Constants)
@@ -74,13 +74,9 @@ void pre_auton(void) {
 /*  This task is used to control your robot during the autonomous phase of   */
 /*  a VEX Competition.                                                       */
 /*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
-  // ..........................................................................
-  // Insert autonomous user code here.
-  // ..........................................................................
   leftDrive.spinFor(forward, 30, degrees);
   rightDrive.spinFor(forward, 30, degrees);
 }
@@ -92,32 +88,23 @@ void autonomous(void) {
 /*  This task is used to control your robot during the user control phase of */
 /*  a VEX Competition.                                                       */
 /*                                                                           */
-/*  You must modify the code to add your own robot specific commands here.   */
 /*---------------------------------------------------------------------------*/
 
 void usercontrol(void) {
   // User control code here, inside the loop
   while (1) {
-    // This is the main execution loop for the user control program.
-    // Each time through the loop your program should update motor + servo
-    // values based on feedback from the joysticks.
-
-    // ........................................................................
-    // Insert user code here. This is where you use the joystick values to
-    // update your motors, etc.
-    // ........................................................................
-
     // Basic tank drive
-    leftFront.spin(forward, Controller.Axis3.position(), percent); // Left Front Drive Code
-    leftBack.spin(forward, Controller.Axis3.position(), percent); // Left Back Drive Code
+    leftFront.spin(forward, Controller.Axis3.position(), percent);  // Left Front Drive Code
+    leftBack.spin(forward, Controller.Axis3.position(), percent);   // Left Back Drive Code
     rightFront.spin(forward, Controller.Axis2.position(), percent); // Right Front Drive Code
-    rightBack.spin(forward, Controller.Axis2.position(), percent); // Right Back Drive Code
+    rightBack.spin(forward, Controller.Axis2.position(), percent);  // Right Back Drive Code
 
     // Move arm
-    if (Controller.ButtonL1.pressing()) {
-      armMotors.spin(forward);
+    if (Controller.ButtonL2.pressing()) {
+      if (armMotors.position(degrees) < 50)
+        armMotors.spin(forward);
     }
-    else if (Controller.ButtonL2.pressing()) {
+    else if (Controller.ButtonL1.pressing()) {
       armMotors.spin(reverse);
     }
 
@@ -132,14 +119,15 @@ void usercontrol(void) {
       pusher.spin(reverse);
     }
 
+    if (Controller.ButtonX.pressing()) {
+      return;
+    }
+
     wait(20, msec); // Sleep the task for a short amount of time to
                     // prevent wasted resources.
   }
 }
 
-//
-// Main will set up the competition functions and callbacks.
-//
 int main() {
   // Set up callbacks for autonomous and driver control periods.
   Competition.autonomous(autonomous);
@@ -153,3 +141,14 @@ int main() {
     wait(100, msec);
   }
 }
+
+
+// BUG REPORT -- 12/03/24, Leah Reed
+//
+// Pusher:
+// * need to figure out why it doesn't reset - look more into how .done() works?
+//
+// Arm:
+// * need to add something so the arm goes up immediatly so we can drive
+// * need to figure out how to restrict movement of the arm
+// * solution to overheating???
