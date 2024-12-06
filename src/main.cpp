@@ -33,9 +33,9 @@ motor leftArm = motor(PORT4, false);
 motor rightArm = motor(PORT5, true);
 motor_group armMotors = motor_group(leftArm, rightArm);
 
-// Global Variables (Constants)
-int PusherStartPosition = 0;
-int ArmStartPosition = 0;
+// Global Variables
+int PusherStartPosition;
+int ArmStartPosition;
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -49,21 +49,16 @@ int ArmStartPosition = 0;
 
 void pre_auton(void) {
 
-  // All activities that occur before the competition starts
-  // Example: clearing encoders, setting servo positions, ...
+  std::cout << "IN PRE-AUTO\n";
 
   // Set motor brake modes
-  armMotors.setStopping(hold);
+  armMotors.setStopping(brake);
   clamp.setStopping(hold);
 
-  leftFront.setStopping(brake);
-  leftBack.setStopping(brake);
-  rightFront.setStopping(brake);
-  rightBack.setStopping(brake);
+  int PusherStartPosition = pusher.position(degrees) + 300;
+  pusher.spinTo(PusherStartPosition, degrees);
 
-  // Set motors to correct position for auto
-  pusher.setPosition(PusherStartPosition, degrees);
-  armMotors.setPosition(ArmStartPosition, degrees);
+  std::cout << "MOTORS SET\n";
 
 }
 
@@ -77,6 +72,8 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
+  std::cout << "IN AUTO\n";
+
   leftDrive.spinFor(forward, 30, degrees);
   rightDrive.spinFor(forward, 30, degrees);
 }
@@ -92,7 +89,17 @@ void autonomous(void) {
 
 void usercontrol(void) {
   // User control code here, inside the loop
+  std::cout << "\nIN TELEOP\n\n";
+
+  int PusherStartPosition = pusher.position(degrees);
+  int PusherEndPosition = 900;
+
+  int ArmStartPosition = armMotors.position(degrees);
+  int ArmEndPosition = -88;
+  
   while (1) {
+
+    
     // Basic tank drive
     leftFront.spin(forward, Controller.Axis3.position(), percent);  // Left Front Drive Code
     leftBack.spin(forward, Controller.Axis3.position(), percent);   // Left Back Drive Code
@@ -100,26 +107,31 @@ void usercontrol(void) {
     rightBack.spin(forward, Controller.Axis2.position(), percent);  // Right Back Drive Code
 
     // Move arm
-    if (Controller.ButtonL2.pressing()) {
-      if (armMotors.position(degrees) < 50)
-        armMotors.spin(forward);
+    if (Controller.ButtonL1.pressing()) {
+
+      armMotors.spinToPosition(ArmEndPosition, degrees);
+
+      std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
     }
-    else if (Controller.ButtonL1.pressing()) {
-      armMotors.spin(reverse);
+    else if (Controller.ButtonL2.pressing()) {
+      std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
+
+      armMotors.spinToPosition(ArmStartPosition, degrees);
     }
 
     // Move pusher
     if (Controller.ButtonA.pressing()) {
-      pusher.spin(forward);
-      if (pusher.isDone()) {
-        pusher.setPosition(PusherStartPosition, degrees);
-      }
+      std::cout << "pusher,   position: " << pusher.position(degrees) << "\n";
+      pusher.spinToPosition(PusherEndPosition, degrees);
+      pusher.spinToPosition(PusherStartPosition, degrees);
     }
     else if (Controller.ButtonB.pressing()) {
-      pusher.spin(reverse);
+      std::cout << "maual pusher down\n";
+      pusher.spinToPosition(PusherEndPosition, degrees);
     }
 
     if (Controller.ButtonX.pressing()) {
+      std::cout << "EMERGENCY STOP: RESET REQUIRED \n";
       return;
     }
 
@@ -143,12 +155,21 @@ int main() {
 }
 
 
-// BUG REPORT -- 12/03/24, Leah Reed
+// BUG REPORT/TO-DOS -- 12/06/24, Leah Reed
 //
-// Pusher:
-// * need to figure out why it doesn't reset - look more into how .done() works?
+// Every system on robot has basic functionality!
+//
+// General:
+// * code basic auto
 //
 // Arm:
-// * need to add something so the arm goes up immediatly so we can drive
-// * need to figure out how to restrict movement of the arm
-// * solution to overheating???
+// * add manuel control on R1 & R2 - (play with velocity??)
+//
+// Pusher:
+// * n/a
+//
+// Drive:
+// * n/a
+//
+// Clamp:
+// * not yet on robot
