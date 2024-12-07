@@ -55,6 +55,8 @@ void pre_auton(void) {
   armMotors.setStopping(brake);
   clamp.setStopping(hold);
 
+  // Set pusher
+  pusher.setVelocity(100, rpm);
   int PusherStartPosition = pusher.position(degrees) + 300;
   pusher.spinTo(PusherStartPosition, degrees);
 
@@ -91,7 +93,7 @@ void usercontrol(void) {
   // User control code here, inside the loop
   std::cout << "\nIN TELEOP\n\n";
 
-  int PusherStartPosition = pusher.position(degrees);
+  int PusherStartPosition = pusher.position(degrees) + 300;
   int PusherEndPosition = 900;
 
   int ArmStartPosition = armMotors.position(degrees);
@@ -99,27 +101,39 @@ void usercontrol(void) {
   
   while (1) {
 
-    
     // Basic tank drive
     leftFront.spin(forward, Controller.Axis3.position(), percent);  // Left Front Drive Code
     leftBack.spin(forward, Controller.Axis3.position(), percent);   // Left Back Drive Code
     rightFront.spin(forward, Controller.Axis2.position(), percent); // Right Front Drive Code
     rightBack.spin(forward, Controller.Axis2.position(), percent);  // Right Back Drive Code
 
-    // Move arm
+    // Move arm -- Automated
     if (Controller.ButtonL1.pressing()) {
-
-      armMotors.spinToPosition(ArmEndPosition, degrees);
-
       std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
+      armMotors.spinToPosition(ArmEndPosition, degrees);
     }
     else if (Controller.ButtonL2.pressing()) {
       std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
-
       armMotors.spinToPosition(ArmStartPosition, degrees);
     }
 
-    // Move pusher
+    // Move arm -- Manual
+    if (Controller.ButtonR1.pressing()) {
+      std::cout << "arm up, manual\n";
+      armMotors.setVelocity(45, rpm);
+      armMotors.spin(reverse);
+    }
+    else if (Controller.ButtonR2.pressing()) {
+      std::cout << "arm down, manual\n";
+      armMotors.setVelocity(45, rpm);
+      armMotors.spin(forward);
+    }
+    else {
+      armMotors.stop();
+      armMotors.setVelocity(50,rpm);
+    }
+
+    // Move pusher -- Automated
     if (Controller.ButtonA.pressing()) {
       std::cout << "pusher,   position: " << pusher.position(degrees) << "\n";
       pusher.spinToPosition(PusherEndPosition, degrees);
@@ -130,6 +144,7 @@ void usercontrol(void) {
       pusher.spinToPosition(PusherEndPosition, degrees);
     }
 
+    // Emergency Stop
     if (Controller.ButtonX.pressing()) {
       std::cout << "EMERGENCY STOP: RESET REQUIRED \n";
       return;
