@@ -89,6 +89,19 @@ void autonomous(void) {
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 
+void tankDrive() {
+  int velocity2 = ((Controller.Axis2.position() * Controller.Axis2.position()) / 1000) * 100;
+  if (Controller.Axis2.position() < 0)
+    velocity2 *= -1;
+
+  int velocity3 = ((Controller.Axis3.position() * Controller.Axis3.position()) / 1000) * 100;
+  if (Controller.Axis3.position() < 0)
+    velocity3 *= -1;
+
+  leftDrive.spin(forward, velocity3, percent);  // Left Drive Code
+  rightDrive.spin(forward, velocity2, percent);  // Right Drive Code
+}
+
 void usercontrol(void) {
   // User control code here, inside the loop
   std::cout << "\nIN TELEOP\n\n";
@@ -101,11 +114,8 @@ void usercontrol(void) {
   
   while (1) {
 
-    // Basic tank drive
-    leftFront.spin(forward, Controller.Axis3.position(), percent);  // Left Front Drive Code
-    leftBack.spin(forward, Controller.Axis3.position(), percent);   // Left Back Drive Code
-    rightFront.spin(forward, Controller.Axis2.position(), percent); // Right Front Drive Code
-    rightBack.spin(forward, Controller.Axis2.position(), percent);  // Right Back Drive Code
+    // Drive Code
+    tankDrive();
 
     // Move arm -- Automated
     if (Controller.ButtonL1.pressing()) {
