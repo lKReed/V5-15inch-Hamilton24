@@ -8,7 +8,8 @@
 /*----------------------------------------------------------------------------*/
 
 #include "vex.h"
-
+#include "math.h"
+#include <iostream>
 using namespace vex;
 
 // A global instance of competition
@@ -90,11 +91,11 @@ void autonomous(void) {
 /*---------------------------------------------------------------------------*/
 
 void tankDrive() {
-  int velocity2 = ((Controller.Axis2.position() * Controller.Axis2.position()) / 1000) * 100;
+  double velocity2 = (pow(abs(Controller.Axis2.position()), 1.43) / 1000) * 100;
   if (Controller.Axis2.position() < 0)
     velocity2 *= -1;
 
-  int velocity3 = ((Controller.Axis3.position() * Controller.Axis3.position()) / 1000) * 100;
+  double velocity3 = (pow(abs(Controller.Axis2.position()), 1.43) / 1000) * 100;
   if (Controller.Axis3.position() < 0)
     velocity3 *= -1;
 
@@ -180,7 +181,7 @@ int main() {
 }
 
 
-// BUG REPORT/TO-DOS -- 12/06/24, Leah Reed
+// BUG REPORT/TO-DOS -- 12/10/24, Leah Reed
 //
 // Every system on robot has basic functionality!
 //
