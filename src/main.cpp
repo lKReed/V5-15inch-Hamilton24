@@ -90,17 +90,34 @@ void autonomous(void) {
 /*                                                                           */
 /*---------------------------------------------------------------------------*/
 
-void tankDrive() {
+// Axis 2 forward/backwards
+// Axis 4 left/right
+void alexDrive() {
   double velocity2 = (pow(abs(Controller.Axis2.position()), 1.43) / 1000) * 100;
   if (Controller.Axis2.position() < 0)
     velocity2 *= -1;
 
-  double velocity3 = (pow(abs(Controller.Axis3.position()), 1.43) / 1000) * 100;
-  if (Controller.Axis3.position() < 0)
-    velocity3 *= -1;
+  double leftVelocity = velocity2;
+  double rightVelocity = velocity2;
 
-  leftDrive.spin(forward, velocity3, percent);  // Left Drive Code
-  rightDrive.spin(forward, velocity2, percent);  // Right Drive Code
+  double velocity4 = (pow(abs(Controller.Axis4.position()), 1.43) / 1000) * 100;
+  if (Controller.Axis4.position() < 0)
+    velocity4 *= -1;
+
+  if (velocity4 != 0)
+    std::cout << "left/right velocity " << velocity4 << "\n";
+
+  if (velocity4 > 0) {
+    rightVelocity = velocity2 - abs(velocity4);
+    leftVelocity = velocity2;
+  }
+  else if (velocity4 < 0) {
+    leftVelocity = velocity2 - abs(velocity4);
+    rightVelocity = velocity2;
+  }
+
+  leftDrive.spin(forward, leftVelocity, percent);  // Left Drive Code
+  rightDrive.spin(forward, rightVelocity, percent);  // Right Drive Code
 }
 
 void usercontrol(void) {
@@ -116,7 +133,7 @@ void usercontrol(void) {
   while (1) {
 
     // Drive Code
-    tankDrive();
+    alexDrive();
 
     // Move arm -- Automated
     if (Controller.ButtonL1.pressing()) {
