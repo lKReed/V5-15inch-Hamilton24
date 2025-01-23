@@ -93,6 +93,7 @@ void autonomous(void) {
 // Axis 2 forward/backwards
 // Axis 4 left/right
 void alexDrive() {
+  // velocity formula for exponential speed instead of linear speed
   double velocity2 = (pow(abs(Controller.Axis2.position()), 1.43) / 1000) * 100;
   if (Controller.Axis2.position() < 0)
     velocity2 *= -1;
@@ -104,26 +105,25 @@ void alexDrive() {
   if (Controller.Axis4.position() < 0)
     velocity4 *= -1;
 
-  if (velocity4 != 0)
-    std::cout << "left/right velocity " << velocity4 << "\n";
-
+  // subtract (and add) the value of left/right velocity from the opposite wheel to turn
   if (velocity4 > 0) {
-    rightVelocity = velocity2 - abs(velocity4);
-    leftVelocity = velocity2;
+    rightVelocity -= abs(velocity4);
+    leftVelocity += abs(velocity4);
   }
   else if (velocity4 < 0) {
-    leftVelocity = velocity2 - abs(velocity4);
-    rightVelocity = velocity2;
+    leftVelocity -= abs(velocity4);
+    rightVelocity += abs(velocity4);
   }
 
-  leftDrive.spin(forward, leftVelocity, percent);  // Left Drive Code
-  rightDrive.spin(forward, rightVelocity, percent);  // Right Drive Code
+  leftDrive.spin(forward, leftVelocity, percent);
+  rightDrive.spin(forward, rightVelocity, percent);
 }
 
 void usercontrol(void) {
   // User control code here, inside the loop
   std::cout << "\nIN TELEOP\n\n";
 
+  int PusherUpPosition = pusher.position(degrees);
   int PusherStartPosition = pusher.position(degrees) + 300;
   int PusherEndPosition = 900;
 
@@ -138,20 +138,22 @@ void usercontrol(void) {
     // Move arm -- Automated
     if (Controller.ButtonL1.pressing()) {
       std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
+      armMotors.setStopping(hold);
       armMotors.spinToPosition(ArmEndPosition, degrees);
     }
     else if (Controller.ButtonL2.pressing()) {
+      armMotors.setStopping(brake);
       std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
       armMotors.spinToPosition(ArmStartPosition, degrees);
     }
 
     // Move arm -- Manual
-    if (Controller.ButtonR1.pressing()) {
-      std::cout << "arm up, manual\n";
+    if (Controller.ButtonA.pressing()) {
+      std::cout << "arm up,   manual\n";
       armMotors.setVelocity(45, rpm);
       armMotors.spin(reverse);
     }
-    else if (Controller.ButtonR2.pressing()) {
+    else if (Controller.ButtonB.pressing()) {
       std::cout << "arm down, manual\n";
       armMotors.setVelocity(45, rpm);
       armMotors.spin(forward);
@@ -162,14 +164,20 @@ void usercontrol(void) {
     }
 
     // Move pusher -- Automated
-    if (Controller.ButtonA.pressing()) {
+    if (Controller.ButtonR1.pressing()) {
       std::cout << "pusher,   position: " << pusher.position(degrees) << "\n";
       pusher.spinToPosition(PusherEndPosition, degrees);
       pusher.spinToPosition(PusherStartPosition, degrees);
     }
-    else if (Controller.ButtonB.pressing()) {
+    else if (Controller.ButtonR2.pressing()) {
       std::cout << "maual pusher down\n";
       pusher.spinToPosition(PusherEndPosition, degrees);
+    }
+
+    // Reset
+    if (Controller.ButtonY.pressing()) {
+      std::cout << "reset pusher to top \n";
+      pusher.spinToPosition(PusherUpPosition, degrees);
     }
 
     // Emergency Stop
