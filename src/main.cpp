@@ -133,65 +133,68 @@ void usercontrol(void) {
   int ArmEndPosition = -150;
   
   while (1) {
+    Timer.reset();
+    while (Timer.time(sec) < 3) {
 
-    // Drive Code
-    alexDrive();
+      // Drive Code
+      alexDrive();
 
-    // Move arm -- Automated
-    if (Controller.ButtonL1.pressing()) {
-      std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
-      armMotors.setStopping(hold);
-      armMotors.spinToPosition(ArmEndPosition, degrees);
-    }
-    else if (Controller.ButtonL2.pressing()) {
-      armMotors.setStopping(brake);
-      armMotors.setVelocity(90, rpm);
-      std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
-      armMotors.spinToPosition(ArmStartPosition, degrees);
-      armMotors.setVelocity(50, rpm);
-    }
+      // Move arm -- Automated
+      if (Controller.ButtonL1.pressing()) {
+        std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
+        armMotors.setStopping(hold);
+        armMotors.spinToPosition(ArmEndPosition, degrees);
+      }
+      else if (Controller.ButtonL2.pressing()) {
+        armMotors.setStopping(brake);
+        armMotors.setVelocity(90, rpm);
+        std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
+        armMotors.spinToPosition(ArmStartPosition, degrees);
+        armMotors.setVelocity(50, rpm);
+      }
 
-    // Move arm -- Manual
-    if (Controller.ButtonUp.pressing()) {
-      std::cout << "arm up,   manual\n";
-      armMotors.setVelocity(45, rpm);
-      armMotors.spin(reverse);
-    }
-    else if (Controller.ButtonDown.pressing()) {
-      std::cout << "arm down, manual\n";
-      armMotors.setVelocity(45, rpm);
-      armMotors.spin(forward);
-    }
-    else {
-      armMotors.stop();
-      armMotors.setVelocity(50,rpm);
-    }
+      // Move arm -- Manual
+      if (Controller.ButtonUp.pressing()) {
+        std::cout << "arm up,   manual\n";
+        armMotors.setVelocity(45, rpm);
+        armMotors.spin(reverse);
+      }
+      else if (Controller.ButtonDown.pressing()) {
+        std::cout << "arm down, manual\n";
+        armMotors.setVelocity(45, rpm);
+        armMotors.spin(forward);
+      }
+      else {
+        armMotors.stop();
+        armMotors.setVelocity(50,rpm);
+      }
 
-    // Move pusher -- Automated
-    if (Controller.ButtonR1.pressing()) {
-      std::cout << "pusher,   position: " << pusher.position(degrees) << "\n";
-      pusher.spinToPosition(PusherEndPosition, degrees);
-      pusher.spinToPosition(PusherStartPosition, degrees);
-    }
-    else if (Controller.ButtonR2.pressing()) {
-      std::cout << "maual pusher down\n";
-      pusher.spinToPosition(PusherEndPosition, degrees);
-    }
+      // Move pusher -- Automated
+      if (Controller.ButtonR1.pressing()) {
+        std::cout << "pusher,   position: " << pusher.position(degrees) << "\n";
+        pusher.spinToPosition(PusherEndPosition, degrees);
+        pusher.spinToPosition(PusherStartPosition, degrees);
+      }
+      else if (Controller.ButtonR2.pressing()) {
+        std::cout << "maual pusher down\n";
+        pusher.spinToPosition(PusherEndPosition, degrees);
+      }
 
-    // Reset
-    if (Controller.ButtonY.pressing()) {
-      std::cout << "reset pusher to top \n";
-      pusher.spinToPosition(PusherUpPosition, degrees);
-    }
+      // Reset
+      if (Controller.ButtonY.pressing()) {
+        std::cout << "reset pusher to top \n";
+        pusher.spinToPosition(PusherUpPosition, degrees);
+      }
 
-    // Emergency Stop
-    if (Controller.ButtonX.pressing()) {
-      std::cout << "EMERGENCY STOP: RESET REQUIRED \n";
-      return;
-    }
+      // Emergency Stop
+      if (Controller.ButtonX.pressing()) {
+        std::cout << "EMERGENCY STOP: RESET REQUIRED \n";
+        return;
+      }
 
-    wait(20, msec); // Sleep the task for a short amount of time to
-                    // prevent wasted resources.
+      wait(20, msec); // Sleep the task for a short amount of time to
+                      // prevent wasted resources.
+    }
   }
 }
 
