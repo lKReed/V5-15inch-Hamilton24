@@ -18,6 +18,8 @@ competition Competition;
 // Motor and Controller definitions
 controller Controller = controller();
 
+timer Timer;
+
 motor leftFront = motor(PORT9, false);
 motor leftBack = motor(PORT10, false);
 motor_group leftDrive = motor_group(leftFront, leftBack);
@@ -128,7 +130,7 @@ void usercontrol(void) {
   int PusherEndPosition = 900;
 
   int ArmStartPosition = armMotors.position(degrees);
-  int ArmEndPosition = -88;
+  int ArmEndPosition = -150;
   
   while (1) {
 
@@ -143,17 +145,19 @@ void usercontrol(void) {
     }
     else if (Controller.ButtonL2.pressing()) {
       armMotors.setStopping(brake);
+      armMotors.setVelocity(90, rpm);
       std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
       armMotors.spinToPosition(ArmStartPosition, degrees);
+      armMotors.setVelocity(50, rpm);
     }
 
     // Move arm -- Manual
-    if (Controller.ButtonA.pressing()) {
+    if (Controller.ButtonUp.pressing()) {
       std::cout << "arm up,   manual\n";
       armMotors.setVelocity(45, rpm);
       armMotors.spin(reverse);
     }
-    else if (Controller.ButtonB.pressing()) {
+    else if (Controller.ButtonDown.pressing()) {
       std::cout << "arm down, manual\n";
       armMotors.setVelocity(45, rpm);
       armMotors.spin(forward);
@@ -204,23 +208,3 @@ int main() {
     wait(100, msec);
   }
 }
-
-
-// BUG REPORT/TO-DOS -- 12/10/24, Leah Reed
-//
-// Every system on robot has basic functionality!
-//
-// General:
-// * code basic auto
-//
-// Arm:
-// * add manuel control on R1 & R2 - (play with velocity??)
-//
-// Pusher:
-// * n/a
-//
-// Drive:
-// * n/a
-//
-// Clamp:
-// * not yet on robot
