@@ -143,13 +143,13 @@ void usercontrol(void) {
       if (Controller.ButtonL1.pressing()) {
         std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
         armMotors.setStopping(hold);
-        armMotors.spinToPosition(ArmEndPosition, degrees);
+        armMotors.spinToPosition(ArmEndPosition, degrees, false);
       }
       else if (Controller.ButtonL2.pressing()) {
         armMotors.setStopping(brake);
         armMotors.setVelocity(90, rpm);
         std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
-        armMotors.spinToPosition(ArmStartPosition, degrees);
+        armMotors.spinToPosition(ArmStartPosition, degrees, false);
         armMotors.setVelocity(50, rpm);
       }
 
