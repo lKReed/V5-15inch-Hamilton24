@@ -55,7 +55,7 @@ void pre_auton(void) {
   std::cout << "IN PRE-AUTO\n";
 
   // Set motor brake modes
-  armMotors.setStopping(brake);
+  armMotors.setStopping(hold);
   clamp.setStopping(hold);
 
   // Set pusher
@@ -79,8 +79,16 @@ void pre_auton(void) {
 void autonomous(void) {
   std::cout << "IN AUTO\n";
 
-  leftDrive.spinFor(forward, 30, degrees);
-  rightDrive.spinFor(forward, 30, degrees);
+  // Set motor brake modes
+  armMotors.setStopping(hold);
+  clamp.setStopping(hold);
+
+  // Set pusher
+  pusher.setVelocity(100, rpm);
+  int PusherStartPosition = pusher.position(degrees) + 300;
+  pusher.spinTo(PusherStartPosition, degrees);
+
+  std::cout << "MOTORS SET\n";
 }
 
 /*---------------------------------------------------------------------------*/
@@ -130,7 +138,7 @@ void usercontrol(void) {
   int PusherEndPosition = 900;
 
   int ArmStartPosition = armMotors.position(degrees);
-  int ArmEndPosition = -150;
+  int ArmEndPosition = -160;
   
   while (1) {
     Timer.reset();
@@ -140,28 +148,26 @@ void usercontrol(void) {
       alexDrive();
 
       // Move arm -- Automated
-      if (Controller.ButtonL1.pressing()) {
+      if (Controller.ButtonUp.pressing()) {
         std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
-        armMotors.setStopping(hold);
-        armMotors.spinToPosition(ArmEndPosition, degrees, false);
+        armMotors.spinToPosition(ArmEndPosition, degrees);
       }
-      else if (Controller.ButtonL2.pressing()) {
-        armMotors.setStopping(brake);
+      else if (Controller.ButtonDown.pressing()) {
         armMotors.setVelocity(90, rpm);
         std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
-        armMotors.spinToPosition(ArmStartPosition, degrees, false);
+        armMotors.spinToPosition(ArmStartPosition, degrees);
         armMotors.setVelocity(50, rpm);
       }
 
       // Move arm -- Manual
-      if (Controller.ButtonUp.pressing()) {
+      if (Controller.ButtonL1.pressing() && armMotors.position(degrees) > ArmEndPosition) {
         std::cout << "arm up,   manual\n";
-        armMotors.setVelocity(45, rpm);
+        armMotors.setVelocity(75, rpm);
         armMotors.spin(reverse);
       }
-      else if (Controller.ButtonDown.pressing()) {
+      else if (Controller.ButtonL2.pressing()) {
         std::cout << "arm down, manual\n";
-        armMotors.setVelocity(45, rpm);
+        armMotors.setVelocity(75, rpm);
         armMotors.spin(forward);
       }
       else {
