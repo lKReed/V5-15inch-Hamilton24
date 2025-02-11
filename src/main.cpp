@@ -77,7 +77,7 @@ void alexDrive() {
   if (Controller.Axis4.position() < 0)
     sidewaysVelocity *= -1;
 
-  // subtract (and add) the value of left/right velocity from the opposite wheel to turn
+  // subtract/add the value of left/right velocity from the opposite wheel to turn
   if (sidewaysVelocity > 0) {
     rightVelocity -= abs(sidewaysVelocity);
     leftVelocity += abs(sidewaysVelocity);
@@ -87,6 +87,7 @@ void alexDrive() {
     rightVelocity += abs(sidewaysVelocity);
   }
 
+  // drive at determined velocity
   leftDrive.spin(forward, leftVelocity, percent);
   rightDrive.spin(forward, rightVelocity, percent);
 }
@@ -94,15 +95,13 @@ void alexDrive() {
 void usercontrol(void) {
   // User control code here, inside the loop
   std::cout << "\nIN TELEOP\n\n";
-
-  int grabberUpPosition = grabber.position(degrees);
   
   while (1) {
 
     // Drive Code
     alexDrive();
 
-    // Move grabber
+    // Move goal grabber
     if (Controller.ButtonR1.pressing()) {
       std::cout << "grabber,   position: " << grabber.position(degrees) << "\n";
       grabber.spin(forward);
@@ -113,12 +112,6 @@ void usercontrol(void) {
     }
     else {
       grabber.stop();
-    }
-
-    // Reset
-    if (Controller.ButtonY.pressing()) {
-      std::cout << "reset grabber to top \n";
-      grabber.spinToPosition(grabberUpPosition, degrees);
     }
 
     // Emergency Stop
