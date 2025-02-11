@@ -18,27 +18,9 @@ competition Competition;
 // Motor and Controller definitions
 controller Controller = controller();
 
-timer Timer;
-
-motor leftFront = motor(PORT9, false);
-motor leftBack = motor(PORT10, false);
-motor_group leftDrive = motor_group(leftFront, leftBack);
-
-motor rightFront = motor(PORT1, true);
-motor rightBack = motor(PORT2, true);
-motor_group rightDrive = motor_group(rightFront, rightBack);
-
-motor pusher = motor(PORT3, false);
-
-motor clamp = motor(PORT7, false);
-
-motor leftArm = motor(PORT4, false);
-motor rightArm = motor(PORT5, true);
-motor_group armMotors = motor_group(leftArm, rightArm);
-
-// Global Variables
-int PusherStartPosition;
-int ArmStartPosition;
+motor leftDrive = motor(PORT10, false);
+motor rightDrive = motor(PORT2, true);
+motor grabber = motor(PORT3, false);
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -54,17 +36,6 @@ void pre_auton(void) {
 
   std::cout << "IN PRE-AUTO\n";
 
-  // Set motor brake modes
-  armMotors.setStopping(hold);
-  clamp.setStopping(hold);
-
-  // Set pusher
-  pusher.setVelocity(100, rpm);
-  int PusherStartPosition = pusher.position(degrees) + 300;
-  pusher.spinTo(PusherStartPosition, degrees);
-
-  std::cout << "MOTORS SET\n";
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -77,18 +48,9 @@ void pre_auton(void) {
 /*---------------------------------------------------------------------------*/
 
 void autonomous(void) {
+
   std::cout << "IN AUTO\n";
 
-  // Set motor brake modes
-  armMotors.setStopping(hold);
-  clamp.setStopping(hold);
-
-  // Set pusher
-  pusher.setVelocity(100, rpm);
-  int PusherStartPosition = pusher.position(degrees) + 300;
-  pusher.spinTo(PusherStartPosition, degrees);
-
-  std::cout << "MOTORS SET\n";
 }
 
 /*---------------------------------------------------------------------------*/
@@ -104,25 +66,25 @@ void autonomous(void) {
 // Axis 4 left/right
 void alexDrive() {
   // velocity formula for exponential speed instead of linear speed
-  double velocity2 = (pow(abs(Controller.Axis2.position()), 1.43) / 1000) * 100;
+  double forwardsVelocity = (pow(abs(Controller.Axis2.position()), 1.43) / 1000) * 100;
   if (Controller.Axis2.position() < 0)
-    velocity2 *= -1;
+    forwardsVelocity *= -1;
 
-  double leftVelocity = velocity2;
-  double rightVelocity = velocity2;
+  double leftVelocity = forwardsVelocity;
+  double rightVelocity = forwardsVelocity;
 
-  double velocity4 = (pow(abs(Controller.Axis4.position()), 1.43) / 1000) * 100;
+  double sidewaysVelocity = (pow(abs(Controller.Axis4.position()), 1.43) / 1000) * 100;
   if (Controller.Axis4.position() < 0)
-    velocity4 *= -1;
+    sidewaysVelocity *= -1;
 
   // subtract (and add) the value of left/right velocity from the opposite wheel to turn
-  if (velocity4 > 0) {
-    rightVelocity -= abs(velocity4);
-    leftVelocity += abs(velocity4);
+  if (sidewaysVelocity > 0) {
+    rightVelocity -= abs(sidewaysVelocity);
+    leftVelocity += abs(sidewaysVelocity);
   }
-  else if (velocity4 < 0) {
-    leftVelocity -= abs(velocity4);
-    rightVelocity += abs(velocity4);
+  else if (sidewaysVelocity < 0) {
+    leftVelocity -= abs(sidewaysVelocity);
+    rightVelocity += abs(sidewaysVelocity);
   }
 
   leftDrive.spin(forward, leftVelocity, percent);
@@ -133,74 +95,40 @@ void usercontrol(void) {
   // User control code here, inside the loop
   std::cout << "\nIN TELEOP\n\n";
 
-  int PusherUpPosition = pusher.position(degrees);
-  int PusherStartPosition = pusher.position(degrees) + 300;
-  int PusherEndPosition = 900;
-
-  int ArmStartPosition = armMotors.position(degrees);
-  int ArmEndPosition = -160;
+  int grabberUpPosition = grabber.position(degrees);
   
   while (1) {
-    Timer.reset();
-    while (Timer.time(sec) < 3) {
 
-      // Drive Code
-      alexDrive();
+    // Drive Code
+    alexDrive();
 
-      // Move arm -- Automated
-      if (Controller.ButtonUp.pressing()) {
-        std::cout << "arm up,   positon: " << armMotors.position(degrees) << "\n";
-        armMotors.spinToPosition(ArmEndPosition, degrees);
-      }
-      else if (Controller.ButtonDown.pressing()) {
-        armMotors.setVelocity(90, rpm);
-        std::cout << "arm down, position: " << armMotors.position(degrees) << "\n";
-        armMotors.spinToPosition(ArmStartPosition, degrees);
-        armMotors.setVelocity(50, rpm);
-      }
-
-      // Move arm -- Manual
-      if (Controller.ButtonL1.pressing() && armMotors.position(degrees) > ArmEndPosition) {
-        std::cout << "arm up,   manual\n";
-        armMotors.setVelocity(75, rpm);
-        armMotors.spin(reverse);
-      }
-      else if (Controller.ButtonL2.pressing()) {
-        std::cout << "arm down, manual\n";
-        armMotors.setVelocity(75, rpm);
-        armMotors.spin(forward);
-      }
-      else {
-        armMotors.stop();
-        armMotors.setVelocity(50,rpm);
-      }
-
-      // Move pusher -- Automated
-      if (Controller.ButtonR1.pressing()) {
-        std::cout << "pusher,   position: " << pusher.position(degrees) << "\n";
-        pusher.spinToPosition(PusherEndPosition, degrees);
-        pusher.spinToPosition(PusherStartPosition, degrees);
-      }
-      else if (Controller.ButtonR2.pressing()) {
-        std::cout << "maual pusher down\n";
-        pusher.spinToPosition(PusherEndPosition, degrees);
-      }
-
-      // Reset
-      if (Controller.ButtonY.pressing()) {
-        std::cout << "reset pusher to top \n";
-        pusher.spinToPosition(PusherUpPosition, degrees);
-      }
-
-      // Emergency Stop
-      if (Controller.ButtonX.pressing()) {
-        std::cout << "EMERGENCY STOP: RESET REQUIRED \n";
-        return;
-      }
-
-      wait(20, msec); // Sleep the task for a short amount of time to
-                      // prevent wasted resources.
+    // Move grabber
+    if (Controller.ButtonR1.pressing()) {
+      std::cout << "grabber,   position: " << grabber.position(degrees) << "\n";
+      grabber.spin(forward);
     }
+    else if (Controller.ButtonR2.pressing()) {
+      std::cout << "grabber,   position: " << grabber.position(degrees) << "\n";
+      grabber.spin(reverse);
+    }
+    else {
+      grabber.stop();
+    }
+
+    // Reset
+    if (Controller.ButtonY.pressing()) {
+      std::cout << "reset grabber to top \n";
+      grabber.spinToPosition(grabberUpPosition, degrees);
+    }
+
+    // Emergency Stop
+    if (Controller.ButtonX.pressing()) {
+      std::cout << "EMERGENCY STOP: RESET REQUIRED \n";
+      return;
+    }
+
+    wait(20, msec); // Sleep the task for a short amount of time to
+                    // prevent wasted resources.
   }
 }
 
