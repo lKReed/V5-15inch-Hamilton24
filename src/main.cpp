@@ -18,9 +18,9 @@ competition Competition;
 // Motor and Controller definitions
 controller Controller = controller();
 
-motor leftDrive = motor(PORT10, false);
-motor rightDrive = motor(PORT2, true);
-motor grabber = motor(PORT3, false);
+motor leftDrive = motor(PORT9, true);
+motor rightDrive = motor(PORT10, false);
+motor grabber = motor(PORT1, true);
 
 /*---------------------------------------------------------------------------*/
 /*                          Pre-Autonomous Functions                         */
@@ -95,6 +95,8 @@ void alexDrive() {
 void usercontrol(void) {
   // User control code here, inside the loop
   std::cout << "\nIN TELEOP\n\n";
+
+  grabber.setVelocity(70, rpm);
   
   while (1) {
 
@@ -102,11 +104,11 @@ void usercontrol(void) {
     alexDrive();
 
     // Move goal grabber
-    if (Controller.ButtonR1.pressing()) {
+    if (Controller.ButtonL1.pressing()) {
       std::cout << "grabber,   position: " << grabber.position(degrees) << "\n";
       grabber.spin(forward);
     }
-    else if (Controller.ButtonR2.pressing()) {
+    else if (Controller.ButtonL2.pressing()) {
       std::cout << "grabber,   position: " << grabber.position(degrees) << "\n";
       grabber.spin(reverse);
     }
