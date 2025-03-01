@@ -18,8 +18,16 @@ competition Competition;
 // Motor and Controller definitions
 controller Controller = controller();
 
-motor leftDrive = motor(PORT9, true);
-motor rightDrive = motor(PORT10, false);
+motor leftFront = motor(PORT9, true);
+motor leftMiddle = motor(PORT8, false);
+motor leftBack = motor(PORT7, true);
+motor_group leftDrive = motor_group(leftFront, leftMiddle, leftBack);
+
+motor rightFront = motor(PORT10, true);
+motor rightMiddle = motor(PORT11, false);
+motor rightBack = motor(PORT12, true);
+motor_group rightDrive = motor_group(rightFront, rightMiddle, rightBack);
+
 motor grabber = motor(PORT1, true);
 
 /*---------------------------------------------------------------------------*/
