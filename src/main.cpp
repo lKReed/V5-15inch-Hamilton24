@@ -23,9 +23,9 @@ motor leftMiddle = motor(PORT8, false);
 motor leftBack = motor(PORT7, true);
 motor_group leftDrive = motor_group(leftFront, leftMiddle, leftBack);
 
-motor rightFront = motor(PORT10, true);
-motor rightMiddle = motor(PORT11, false);
-motor rightBack = motor(PORT12, true);
+motor rightFront = motor(PORT10, false);
+motor rightMiddle = motor(PORT11, true);
+motor rightBack = motor(PORT12, false);
 motor_group rightDrive = motor_group(rightFront, rightMiddle, rightBack);
 
 motor grabber = motor(PORT1, true);
